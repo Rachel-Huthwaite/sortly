@@ -5,27 +5,51 @@ from rich.console import Console
 
 console = Console()
 
-def navigate():
+def navigate(current_dir):
 
-    # console.print("[yellow]Showing directories...[/yellow]")
+    console.print(f"[yellow]Current Location: {current_dir}[/yellow]")
 
-    # all_files = os.listdir
-    # options = []
+    sub_folders = [item for item in current_dir.iterdir() if item.is_dir()]
+    options = ["Stay in current directory","Previous Directory","Home Directory"]
 
-    # for files in all_files:
-    #     options.append(files)
+    for folder in sub_folders:
+        options.append(folder.name)
 
-    # answer = questionary.select(
-    # "Which directory would you like to go to?",
-    # choices=options
-    # ).ask()
-    return ""
+    if not sub_folders:
+        console.print("[dim]No subfolders found in this directory.[/dim]")
 
-def inspect():
+    answer = questionary.select(
+    "Which directory would you like to go to?",
+    choices=options
+    ).ask()
 
-    #using pathlib to get current directory
-    current_dir = Path.cwd()
-    console.print("[bold cyan]Showing directories...[/bold cyan]")
+    if answer == "Stay in current directory":
+        console.print(f"[cyan]Stayed in current directory: {current_dir}[/cyan]")
+        return current_dir
+    
+    elif answer == "Previous Directory":
+        if current_dir == Path.home():
+            console.print("[yellow]Already at home directory.[/yellow]")
+            return current_dir
+        else:
+            new_dir = current_dir.parent
+            console.print(f"[green]Moving into: {answer} [/green]")
+            return new_dir
+    
+    elif answer == "Home Directory":
+        new_dir = Path.home()
+        console.print(f"[green]Moving to Home Directory: {answer} [/green]")
+        return new_dir
+    
+    else:
+        new_dir = current_dir / answer
+        console.print(f"[green]Moving into: {answer} [/green]")
+        return new_dir
+
+
+def inspect(current_dir):
+
+    console.print("[bold cyan]Showing folders and files ...[/bold cyan]")
 
     items = list(current_dir.iterdir())
 
@@ -76,6 +100,9 @@ def loading_bar():
 #This will have make_cripsy, exit, inspect and navigate living in here
 def main_menu():
 
+    #using pathlib to make the user always start in the home directory
+    #remember this, this may not live right here, just keeping it here for my thinking
+    current_dir = Path.home #<< only for my reference
     options = ["Navigate", "Inspect", "Make Crispy", "Exit App"]
 
     while True:
@@ -86,10 +113,10 @@ def main_menu():
         ).ask()
 
         if answer == "Navigate":
-            navigate()
+            navigate(current_dir)
         
         elif answer == "Inspect":
-            inspect()
+            inspect(current_dir)
         
         elif answer == "Make Crispy":
             make_cripsy()
