@@ -1,7 +1,11 @@
 import questionary
 import os
+import time
+from rich.progress import track
+from rich.table import Table
 from pathlib import Path
 from rich.console import Console
+import organiser
 
 console = Console()
 
@@ -79,9 +83,6 @@ def inspect(current_dir):
     console.print("")
 
 
-def exit_app():
-    return ""
-
 #This will have both standard_crispy and developer mode living in here
 def make_crispy(current_dir):
 
@@ -108,22 +109,50 @@ def make_crispy(current_dir):
 
 
 
-def standard_crispy():
-    return ""
+def standard_crispy(current_dir):
+
+    console.print(f"\n[bold yellow]Preparing to crispify: {current_dir}[/bold yellow]")
+    categorised_files, sensitive_files = organiser.scan_directory(str(current_dir))
+
+    total_files = sum(len(files)for files in categorised_files.values())
+
+    if total_files == 0:
+        console.print("[bold red]No files found to organise[/bold red]")
+        return
+    
+    console.print("\n[bold green]Busy making crispy...[/bold green]")
+    for _ in track(range(total_files), description="[cyan]Processing...[/cyan]"):
+        time.sleep(0.1)
+
+    summary = organiser.organise_files(str(current_dir), categorised_files)
+
+    if summary["moved"]:
+        console.print("\n[bold green] Made Crispy! Here is what moved:[/bold green]")
+        table = Table(title="Crispy File Movement Summary", title_style="bold magenta")
+        table.add_column("File Name", style="green")
+        table.add_column("Destination Folder", style="bold blue")
+
+        for filename, category in summary["moved"]:
+            table.add_row(filename, f"{category}/")
+
+        console.print(table)
+
+    if summary["errors"]:
+        console.print("\n[bold red]Some errors occurred during organizing:[/bold red]")
+        for filename, error in summary["errors"]:
+            console.print(f"  [red]• {filename}: {error}[/red]")
+
+    
+        
 
 def developer_mode():
     return ""
 
-#Perameter needed
-def loading_bar():
-    return ""
 
 #This will have make_cripsy, exit, inspect and navigate living in here
 def main_menu():
 
-    #using pathlib to make the user always start in the home directory
-    #remember this, this may not live right here, just keeping it here for my thinking
-    current_dir = Path.home #<< only for my reference
+    current_dir = Path.home()
     options = ["Navigate", "Inspect", "Make Crispy", "Exit App"]
 
     while True:
@@ -134,13 +163,13 @@ def main_menu():
         ).ask()
 
         if answer == "Navigate":
-            navigate(current_dir)
+            current_dir = navigate(current_dir)
         
         elif answer == "Inspect":
             inspect(current_dir)
         
         elif answer == "Make Crispy":
-            make_crispy()
+            make_crispy(current_dir)
         
         elif answer == "Exit App":
             console.print("[bold red]Goodbye![/bold red]")
