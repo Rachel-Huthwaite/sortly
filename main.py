@@ -16,7 +16,7 @@ def navigate(current_dir):
         options.append(folder.name)
 
     if not sub_folders:
-        console.print("[dim]No subfolders found in this directory.[/dim]")
+            console.print("[dim]No subfolders found in this directory.[/dim]")
 
     answer = questionary.select(
     "Which directory would you like to go to?",
@@ -79,15 +79,36 @@ def inspect(current_dir):
     console.print("")
 
 
-
 def exit_app():
     return ""
 
 #This will have both standard_crispy and developer mode living in here
-def make_cripsy():
-    return ""
+def make_crispy(current_dir):
 
-def standard_cripsy():
+    console.print("[bold]You have 2 modes to choose from[/bold]")
+    console.print("[green]=======================================================================================[/green]")
+    console.print("")
+    console.print("[blue]Standard Crispy :     Runs the program normally and will sort all your files[/blue]")
+    console.print("[blue]Developer Mode  :     Allows you to choose which file types you would like to organize[/blue]")
+    console.print("")
+    console.print("[green]=======================================================================================[/green]")
+
+    options = ["Standard Crispy","Developer Mode"]
+
+    answer = questionary.select(
+    "Would you like to run standard or developer mode?",
+    choices=options
+    ).ask()
+
+    if answer == "Standard Crispy":
+        standard_crispy(current_dir)
+
+    elif answer == "Developer Mode":
+        developer_mode(current_dir)
+
+
+
+def standard_crispy():
     return ""
 
 def developer_mode():
@@ -119,7 +140,7 @@ def main_menu():
             inspect(current_dir)
         
         elif answer == "Make Crispy":
-            make_cripsy()
+            make_crispy()
         
         elif answer == "Exit App":
             console.print("[bold red]Goodbye![/bold red]")
