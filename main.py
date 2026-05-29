@@ -145,8 +145,61 @@ def standard_crispy(current_dir):
     
         
 
-def developer_mode():
-    return ""
+def developer_mode(current_dir):
+    console.print(f"[bold magenta]Entering Developer mode at: {current_dir}[/bold magenta]")
+
+    categorised_files, sensitive_files = organiser.scan_directory(str(current_dir))
+
+    available_extensions = list(categorised_files.keys())
+
+    if not available_extensions:
+        console.print("[bold red]No organizable files found in this directory.[/bold red]\n")
+        return
+
+    console.print("\n[dim]Use SPACEBAR to select/deselect, and ENTER to confirm.[/dim]")
+    selected_extensions = questionary.checkbox(
+        "Which file extensions would you like to organize?",
+        choices=available_extensions
+    ).ask()
+
+    if not selected_extensions:
+        console.print("[yellow]No extensions selected. Aborting Developer Mode[/yellow]")
+        return
+    
+    filter_categorised_files = {
+        category : paths
+        for category, paths in categorised_files.items()
+        if category in selected_extensions
+    }
+
+    total_files_to_move = sum(len(paths) for paths in filter_categorised_files.values())
+
+    console.print(f"\n[bold green]Busy running targeted cripsy operation...[/bold green]")
+    for _ in track(range(total_files_to_move), description="[cyan]Filtering & Processing...[/cyan]"):
+        time.sleep(0.1)
+
+    summary = organiser.organise_files(str(current_dir), filter_categorised_files)
+
+    if summary["moved"]:
+        console.print("\n[bold green] Made Crispy! Here is what moved:[/bold green]")
+        table = Table(title="Developer Mode Movement Summary", title_style="bold magenta")
+        table.add_column("File Name", style="green")
+        table.add_column("Destination Folder", style="bold blue")
+
+        for filename, category in summary["moved"]:
+            table.add_row(filename, f"{category}/")
+
+        console.print(table)
+
+    if summary["errors"]:
+        console.print("\n[bold red]Some errors occurred during targeted organizing:[/bold red]")
+        for filename, error in summary["errors"]:
+            console.print(f"  [red]• {filename}: {error}[/red]")
+
+    console.print("\n" + "="*50)
+    console.print("[bold gold1]Updated Directory Preview After Developer Mode Update:[/bold gold1]")
+    inspect(current_dir)
+
 
 
 #This will have make_cripsy, exit, inspect and navigate living in here
