@@ -1,13 +1,60 @@
 import questionary
+import os
+from pathlib import Path
 from rich.console import Console
 
 console = Console()
 
 def navigate():
+
+    # console.print("[yellow]Showing directories...[/yellow]")
+
+    # all_files = os.listdir
+    # options = []
+
+    # for files in all_files:
+    #     options.append(files)
+
+    # answer = questionary.select(
+    # "Which directory would you like to go to?",
+    # choices=options
+    # ).ask()
     return ""
 
 def inspect():
-    return ""
+
+    #using pathlib to get current directory
+    current_dir = Path.cwd()
+    console.print("[bold cyan]Showing directories...[/bold cyan]")
+
+    items = list(current_dir.iterdir())
+
+    if not items:
+        console.print("[italic cyan]This directory is empty.[/italic cyan]")
+        return
+    
+    console.print("[bold underline]Folders:[/bold underline]")
+    folders = [item for item in items if item.is_dir()]
+    if folders:
+        for folder in folders:
+            console.print(f"  📁 [bold blue]{folder.name}[/bold blue]")
+
+    else: 
+        console.print("  [dim]None[/dim]")
+
+    console.print("\n[bold underline]Files:[/bold underline]")
+    files = [item for item in items if item.is_file()]
+    if files:
+        for file in files:
+            console.print(f"  📄 [green]{file.name}[/green]")
+
+    else: 
+        console.print("  [dim]None[/dim]")
+
+    #extra line just for clean formatting
+    console.print("")
+
+
 
 def exit_app():
     return ""
